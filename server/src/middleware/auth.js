@@ -6,7 +6,7 @@ const authMiddleWare = (req, res, next) => {
   if (!token) return res.status(403).send({ error: 'Must provide token' })
 
   // verifies secret and checks exp
-  jwt.verify(token, jwtSecret}, (err, decodedToken) => {
+  jwt.verify(token, jwtSecret, (err, decodedToken) => {
     if (err) return res.sendStatus(403)
     res.locals.user = decodedToken
     next()

@@ -8,7 +8,7 @@ const login = (req, res) => {
   const username = req.body.username.toLowerCase();
   const password = req.body.password;
 
-  db.get(`SELECT rowid AS id, username, password FROM users`, async (err, user) => {
+  db.get(`SELECT rowid AS id, username, password FROM users WHERE username == '${username}'`, async (err, user) => {
     if (err) throw err;
     if (!user) return res.status(401).json({ error: 'No such user' });
     const isMatch = await comparePassword(password, user.password)
