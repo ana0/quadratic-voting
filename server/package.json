@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/ana0/quadratic-voting#readme",
   "dependencies": {
+    "bcrypt": "^3.0.4",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "express": "^4.16.4",
