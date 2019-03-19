@@ -1,7 +1,16 @@
 const db = require('../connections/sqlite')
 
 const readPolls = (req, res)  => {
-  return db.all(`SELECT question, answer, pollsId FROM polls INNER JOIN pollItems ON pollItems.pollsId = polls.id;`, async (err, polls) => {
+  if (req.params.id) {
+    // TO-DO parse int on id
+    return db.all(`SELECT answer FROM pollItems WHERE pollsId IS '${req.params.id}';`, async (err, poll) => {
+      if (err) throw err;
+      if (!poll) return res.status(401).json({ error: 'Not found' });
+      return res.status(200).json({ pollId: req.params.id, answers: poll })
+    })
+  }
+  //return db.all(`SELECT question, answer, pollsId FROM polls INNER JOIN pollItems ON pollItems.pollsId = polls.id;`, async (err, polls) => {
+  return db.all(`SELECT id, question FROM polls;`, async (err, polls) => {
     if (err) throw err;
     if (!polls) return res.status(401).json({ error: 'No polls' });
     return res.status(200).json({ polls })
