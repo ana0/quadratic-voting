@@ -4,7 +4,6 @@ import './index.css'
 import { apiUrl } from './env'
 
 class FormRow extends Component {
-
   render() {
     return (
         <label>
@@ -87,7 +86,7 @@ class AnswerForm extends Component {
 
 class TableRow extends Component {
   render() {
-    //  console.log('table row')
+    // console.log('table row')
   	// console.log(this.props)
   	// console.log(this.state)
     return (
@@ -146,7 +145,11 @@ class App extends Component {
       totalVotes: 25,
       votes: []
     };
+    this.sessionId = localStorage.getItem('myData');
+    if (!sessionId) { localStorage.setItem("sessionId", (Math.random() * Math.pow(2, 54)).toString(36) }
+    console.log(this.sessionId)
   }
+
 
   componentDidMount() {
     return fetch(`${apiUrl}polls`, {
