@@ -10,6 +10,7 @@ class FormRow extends Component {
         <label>
           {this.props.row.answer}:
           <input type="text" onChange={(event) => this.props.handleChange(event, this.props.row.answer)} /><br />
+          {this.props.row.voteWeight ? <p>These vote credits give {this.props.row.voteWeight} vote weight</p> : null}
         </label>
     )
   }
@@ -20,7 +21,8 @@ class AnswerForm extends Component {
     super(props);
     this.state = {
       hasError: false,
-      votes: this.props.data.answers
+      votes: this.props.data.answers,
+      remainingVotes: 25
     };
   }
 
@@ -33,28 +35,50 @@ class AnswerForm extends Component {
   	console.log('change')
   	console.log(event.target.value)
     let hasError
+    let error = ''
+    let sumVotes = 0
+    let remainingVotes
     const vote = parseInt(event.target.value);
   	const votes = this.state.votes.map((v) => {
-    	if (v.answer = currentAnswer) { v.vote = vote }
-      if (Number.isNaN(v.vote)) { hasError = true }
+    	if (v.answer === currentAnswer) { v.vote = vote }
+      if (Number.isNaN(v.vote) || v.vote === undefined) {
+        console.log('iterating')
+        hasError = true; error = 'Only decimal numbers as vote input'
+        v.voteWeight = 0
+      }
+      else {
+        console.log(`iterating sumvotes is ${sumVotes}`)
+        console.log(v.vote)
+        sumVotes += v.vote
+        console.log(`iterating 2 sumvotes is ${sumVotes}`)
+        const sqrt = Math.round(Math.sqrt(v.vote))
+        v.voteWeight = sqrt
+      }
+      if (sumVotes > this.props.data.totalVotes) { hasError = true; error = 'Too many votes!' }
     	return v
   	})
-   //  //const parsedVotes = 
-  	// const vote = parseInt(event.target.value)
-  	// if (Number.isNaN(vote)) {
-  	this.setState({ hasError, error: 'Only decimal numbers as vote input', votes });
-  	// }
-    //this.setState({value: event.target.value});
+    console.log(votes)
+    console.log('sumVotes:' + sumVotes)
+    console.log('remainingVotes:')
+    console.log(remainingVotes)
+    const answers = this.props.data.answers
+    remainingVotes = this.props.data.totalVotes - sumVotes
+  	this.setState({ hasError, error, votes, remainingVotes });
   }
 
   render() {
     console.log('table row')
   	console.log(this.props)
   	console.log(this.state)
+    console.log(this.state.remainingVotes)
     return (
       <form onSubmit={this.handleSubmit}>
         {this.state.hasError ? <h2>{this.state.error}</h2> : null}
-	    {this.props.data.answers.map(row => <FormRow row={row ? row : {}} handleChange={this.handleChange.bind(this)}/>)}
+        {this.state.remainingVotes > 0 ? <h2>Remaining vote credits: {this.state.remainingVotes}</h2> : null}
+        {this.state.votes.map(row => <FormRow row={
+          row ? row : {}}
+          handleChange={this.handleChange.bind(this)}
+          />)}
         <input type="submit" value="Submit" />
       </form>
     )
@@ -63,7 +87,7 @@ class AnswerForm extends Component {
 
 class TableRow extends Component {
   render() {
-   //  console.log('table row')
+    //  console.log('table row')
   	// console.log(this.props)
   	// console.log(this.state)
     return (
