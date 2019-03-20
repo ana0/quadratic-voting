@@ -21,18 +21,43 @@ class AnswerForm extends Component {
     this.state = {
       hasError: false,
       votes: this.props.data.answers,
-      remainingVotes: 25
+      remainingVotes: 25,
+      message: false
     };
   }
 
-  handleSubmit(event) {
-    alert('A name was submitted: ' + this.state.value);
-    //event.preventDefault();
+  async handleSubmit(event) {
+    if (this.state.hasError) { alert('Cannot submit votes with errors!') }
+    else { 
+      const voteData = {
+        votes: this.state.votes,
+        sessionId: localStorage.getItem('sessionId'),
+        pollId: this.props.data.pollId
+      }
+      fetch(`${apiUrl}votes`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(voteData),
+      })
+      .then(response => {
+        console.log(response)
+        if (response.status === 403 ) {
+          this.setState({ message: 'You cannot vote in the same poll again!' })
+        } else {
+          this.setState({ message: 'Votes were submitted' })
+        }
+        return response.json()
+      })
+      .then(data => {
+        alert(this.state.message)
+      })
+    }
   }
 
   handleChange(event, currentAnswer) {
-  	console.log('change')
-  	console.log(event.target.value)
     let hasError
     let error = ''
     let sumVotes = 0
@@ -41,41 +66,29 @@ class AnswerForm extends Component {
   	const votes = this.state.votes.map((v) => {
     	if (v.answer === currentAnswer) { v.vote = vote }
       if (Number.isNaN(v.vote) || v.vote === undefined) {
-        console.log('iterating')
         hasError = true; error = 'Only decimal numbers as vote input'
         v.voteWeight = 0
       }
       else {
-        console.log(`iterating sumvotes is ${sumVotes}`)
-        console.log(v.vote)
         sumVotes += v.vote
-        console.log(`iterating 2 sumvotes is ${sumVotes}`)
         const sqrt = Math.round(Math.sqrt(v.vote))
         v.voteWeight = sqrt
       }
       if (sumVotes > this.props.data.totalVotes) { hasError = true; error = 'Too many votes!' }
     	return v
   	})
-    console.log(votes)
-    console.log('sumVotes:' + sumVotes)
-    console.log('remainingVotes:')
-    console.log(remainingVotes)
-    const answers = this.props.data.answers
     remainingVotes = this.props.data.totalVotes - sumVotes
   	this.setState({ hasError, error, votes, remainingVotes });
   }
 
   render() {
-    console.log('table row')
-  	console.log(this.props)
-  	console.log(this.state)
-    console.log(this.state.remainingVotes)
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form onSubmit={this.handleSubmit.bind(this)}>
         {this.state.hasError ? <h2>{this.state.error}</h2> : null}
         {this.state.remainingVotes > 0 ? <h2>Remaining vote credits: {this.state.remainingVotes}</h2> : null}
         {this.state.votes.map(row => <FormRow row={
           row ? row : {}}
+          key={row.id}
           handleChange={this.handleChange.bind(this)}
           />)}
         <input type="submit" value="Submit" />
@@ -86,9 +99,6 @@ class AnswerForm extends Component {
 
 class TableRow extends Component {
   render() {
-    // console.log('table row')
-  	// console.log(this.props)
-  	// console.log(this.state)
     return (
 	  <tr onClick={this.props.onClick}>
 	    <td key={this.props.row.id}>{this.props.row.id}</td>
@@ -106,16 +116,11 @@ class PollTable extends Component {
 	    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 	  }})
       .then(response => {
-      	console.log(response)
       	return response.json()
       })
       .then(data => {
-      	console.log(data)
       	const question = this.props.data.find(row => row.id === i)
-      	// this.setState({ question: question.question, answers: data.answers })
-      	// console.log('handling click')
-      	// console.log(question.question)
-      	this.props.unmountPolls({ question: question.question, answers: data.answers })
+      	this.props.unmountPolls({ question: question.question, answers: data.answers, pollId: question.id })
       });
   }
 
@@ -138,16 +143,15 @@ class App extends Component {
     this.handleUnmountPolls = this.handleUnmountPolls.bind(this);
     this.state = {
       renderPolls: true,
+      sessionId: '',
       renderAnswerForm: false,
       polls: [],
       question: '',
+      pollId: '',
       answers: [],
       totalVotes: 25,
       votes: []
     };
-    this.sessionId = localStorage.getItem('myData');
-    if (!sessionId) { localStorage.setItem("sessionId", (Math.random() * Math.pow(2, 54)).toString(36) }
-    console.log(this.sessionId)
   }
 
 
@@ -158,12 +162,16 @@ class App extends Component {
 	    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 	  }})
       .then(response => {
-      	//console.log(response)
       	return response.json()
       })
       .then(data => {
-      	//console.log(data.polls)
-      	return this.setState({ polls: data.polls })
+        let sessionId = localStorage.getItem('sessionId');
+        console.log('sessionId:' + sessionId)
+        if (!sessionId) {
+          sessionId = (Math.random() * Math.pow(2, 54)).toString(36);
+          localStorage.setItem("sessionId", sessionId)
+        }
+      	return this.setState({ polls: data.polls, sessionId })
       });
   }
 
@@ -172,9 +180,6 @@ class App extends Component {
   }
 
   render() {
-   //  console.log('render')
-  	// console.log(`state data is ${this.state.question}`)
-  	// console.log(this.state)
     return (
       <div className="App">
         <h1>{this.state.question}</h1>

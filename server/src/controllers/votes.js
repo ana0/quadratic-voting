@@ -7,7 +7,8 @@ const readVotes = () => {
 const createVotes = (req, res) => {
   console.log('create votes')
   //let pollId
-  let { votes, sessionId, pollId } = req.body.votes
+  console.log(req.body)
+  let { votes, sessionId, pollId } = req.body
   // votes = votes.map((votes) => {
   // 	v.pollsId = pollId
   // 	v.sessionId = sessionId
@@ -17,7 +18,8 @@ const createVotes = (req, res) => {
   console.log(pollId)
   db.get(`SELECT rowid AS id FROM hasVoted WHERE sessionId == '${sessionId}' AND pollsId == '${pollId}'`, function(err, hasVoted) {
     if (err) throw err;
-    if (hasVoted) return res.status(401).json({ error: 'You have already voted on this poll' });
+    console.log(hasVoted)
+    if (hasVoted) return res.status(403).json({ error: 'You have already voted on this poll' });
 
     const stmt = db.prepare("INSERT INTO votes(pollsId, voteWeight, pollItemsId) VALUES (?, ?, ?)");
     votes.map((a) => {
