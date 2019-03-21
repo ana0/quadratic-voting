@@ -21,6 +21,7 @@ module.exports = (app) => {
   app.delete('/polls', authMiddleware, (req, res) => res.status(200).json('Polls endpoint'))
 
   app.get('/votes', (req, res) => res.status(200).json('Votes endpoint'))
+  app.get('/votes/:id', votes.readVotes)
   app.post('/votes', votes.createVotes)
   app.put('/votes', (req, res) => res.status(200).json('Votes endpoint'))
   app.delete('/votes', (req, res) => res.status(200).json('Votes endpoint'))
