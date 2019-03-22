@@ -23,6 +23,7 @@
 *.log
 *.csv
 *.notes
+*.db
 
 */npm-debug.log*
 */yarn-debug.log*
