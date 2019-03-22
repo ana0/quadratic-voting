@@ -27,6 +27,7 @@ class AnswerForm extends Component {
   }
 
   handleSubmit(event) {
+    event.preventDefault();
     console.log('submit')
     if (this.state.hasError) { alert('Cannot submit votes with errors!') }
     else { 
@@ -35,7 +36,8 @@ class AnswerForm extends Component {
         sessionId: localStorage.getItem('sessionId'),
         pollId: this.props.data.pollId
       }
-      fetch(`${apiUrl}votes`, {
+      console.log(voteData)
+      return fetch(`${apiUrl}votes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -53,6 +55,7 @@ class AnswerForm extends Component {
       })
       .then(message => {
         alert(message)
+        this.props.unmountAnswers()
       })
       .catch((err) => console.log(err))
     }
@@ -83,6 +86,7 @@ class AnswerForm extends Component {
   }
 
   render() {
+    console.log('test console')
     return (
       <form onSubmit={this.handleSubmit.bind(this)}>
         {this.state.hasError ? <h2>{this.state.error}</h2> : null}
@@ -142,6 +146,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.handleUnmountPolls = this.handleUnmountPolls.bind(this);
+    this.handleUnmountAnswers = this.handleUnmountAnswers.bind(this);
     this.state = {
       renderPolls: true,
       sessionId: '',
@@ -150,7 +155,7 @@ class App extends Component {
       question: '',
       pollId: '',
       answers: [],
-      totalVotes: 25,
+      totalVotes: 50,
       votes: []
     };
   }
@@ -180,12 +185,16 @@ class App extends Component {
   	this.setState({renderPolls: false, ...chosenPoll, renderAnswerForm: true });
   }
 
+  handleUnmountAnswers() {
+    this.setState({renderPolls: true, question: '', renderAnswerForm: false });
+  }
+
   render() {
     return (
       <div className="App">
         <h1>{this.state.question}</h1>
         {this.state.renderPolls ? <PollTable data={this.state.polls} unmountPolls={this.handleUnmountPolls}/> : null}
-        {this.state.renderAnswerForm ? <AnswerForm data={this.state} /> : null}
+        {this.state.renderAnswerForm ? <AnswerForm data={this.state} unmountAnswers={this.handleUnmountAnswers}/> : null}
       </div>
     )
   }
