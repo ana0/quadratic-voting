@@ -35,10 +35,9 @@ class AnswerForm extends Component {
         sessionId: localStorage.getItem('sessionId'),
         pollId: this.props.data.pollId
       }
-      return fetch(`${apiUrl}votes`, {
+      fetch(`${apiUrl}votes`, {
         method: 'POST',
         headers: {
-          'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(voteData),
@@ -46,15 +45,16 @@ class AnswerForm extends Component {
       .then(response => {
         console.log(response)
         if (response.status === 403 ) {
-          this.setState({ message: 'You cannot vote in the same poll again!' })
+          return 'You cannot vote in the same poll again!'
         } else {
-          this.setState({ message: 'Votes were submitted' })
+          console.log('submitted')
+          return 'Votes were submitted'
         }
-        return response.json()
       })
-      .then(data => {
-        alert(this.state.message)
+      .then(message => {
+        alert(message)
       })
+      .catch((err) => console.log(err))
     }
   }
 

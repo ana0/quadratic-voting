@@ -4,19 +4,22 @@ const readVotes = (req, res) => {
   console.log('read votes')
   if (!req.params.id) return res.status(403).json({ error: 'Must send poll id'})
   const pollId = req.params.id;
-  db.all(`SELECT votes.id, voteWeight, pollItemsId FROM votes INNER JOIN pollItems ON pollItems.id = votes.pollItemsId WHERE votes.pollsId IS ${pollId};`, function(err, votes) {
+  db.all(`SELECT votes.id, voteWeight, pollItemsId, answer FROM votes INNER JOIN pollItems ON pollItems.id = votes.pollItemsId WHERE votes.pollsId IS ${pollId};`, function(err, votes) {
     if (err) throw err; //WHERE pollsId IS ${pollId}
     console.log(votes)
     const seenAnswers = {}
-    const summedVotes = votes.map((vote) => {
+    const summedVotes = votes.map((vote, index, array) => {
     	if (seenAnswers[vote.pollItemsId]) {
-    		// find index of matching vote
-    		// add v.voteWeight to match.voteWeight
+        const match = array.find(a => a.pollItemsId === vote.pollItemsId)
+        console.log(match)
+        match.voteWeight += vote.voteWeight
+        return false;
     	}
-    	else { seenAnswers[vote.pollItemsId] = true }
+    	else { seenAnswers[vote.pollItemsId] = true; return vote }
     })
+    console.log(summedVotes)
     // sort summedVotes by voteWeight
-    return votes
+    return res.status(200).json({ totals: summedVotes })
   })
 }
 
