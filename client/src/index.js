@@ -26,7 +26,8 @@ class AnswerForm extends Component {
     };
   }
 
-  async handleSubmit(event) {
+  handleSubmit(event) {
+    console.log('submit')
     if (this.state.hasError) { alert('Cannot submit votes with errors!') }
     else { 
       const voteData = {
@@ -34,7 +35,7 @@ class AnswerForm extends Component {
         sessionId: localStorage.getItem('sessionId'),
         pollId: this.props.data.pollId
       }
-      fetch(`${apiUrl}votes`, {
+      return fetch(`${apiUrl}votes`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
