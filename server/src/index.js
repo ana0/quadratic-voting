@@ -3,6 +3,7 @@ const routes = require('./routes')
 const port = require('./config/env').port
 const db = require('./connections/sqlite')
 const createAdminUser = require('./lib/auth').createAdminUser
+const dotenv = require('dotenv').config({path: "../.env"});
 
 const app = express()
 routes(app)
