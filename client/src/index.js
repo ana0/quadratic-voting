@@ -21,8 +21,9 @@ class AnswerForm extends Component {
     this.state = {
       hasError: false,
       votes: this.props.data.answers,
-      remainingVotes: 25,
-      message: false
+      remainingVotes: 50,
+      message: false,
+      instructions: "Enter the number of vote credits you'd like per choice"
     };
   }
 
@@ -69,8 +70,11 @@ class AnswerForm extends Component {
     const vote = parseInt(event.target.value);
   	const votes = this.state.votes.map((v) => {
     	if (v.answer === currentAnswer) { v.vote = vote }
-      if (Number.isNaN(v.vote) || v.vote === undefined) {
+      if (Number.isNaN(v.vote)) {
         hasError = true; error = 'Only decimal numbers as vote input'
+        v.voteWeight = 0
+      }
+      else if (v.vote === undefined) {
         v.voteWeight = 0
       }
       else {
@@ -89,8 +93,9 @@ class AnswerForm extends Component {
     console.log('test console')
     return (
       <form onSubmit={this.handleSubmit.bind(this)}>
-        {this.state.hasError ? <h2>{this.state.error}</h2> : null}
-        {this.state.remainingVotes > 0 ? <h2>Remaining vote credits: {this.state.remainingVotes}</h2> : null}
+        {this.state.instructions}
+        {this.state.hasError ? <p style={{color:'red'}}>{this.state.error}</p> : null}
+        {this.state.remainingVotes > 0 ? <h3>Remaining vote credits: {this.state.remainingVotes}</h3> : null}
         {this.state.votes.map(row => <FormRow row={
           row ? row : {}}
           key={row.id}
