@@ -8,7 +8,7 @@ class FormRow extends Component {
     return (
         <label>
           {this.props.row.answer}:
-          <input type="text" onChange={(event) => this.props.handleChange(event, this.props.row.answer)} /><br />
+          <br /><input type="text" onChange={(event) => this.props.handleChange(event, this.props.row.answer)} /><br />
           {this.props.row.voteWeight ? <p>These vote credits give {this.props.row.voteWeight} vote weight</p> : null}
         </label>
     )
